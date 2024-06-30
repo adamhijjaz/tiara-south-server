@@ -22,7 +22,7 @@ router.post("/", async (req, res) => {
   });
 });
 
-router.post("/login", async (req, res) => {
+router.post("/Login", async (req, res) => {
   const { email, password } = req.body;
 
   const user = await Users.findOne({ where: { email: email } });
