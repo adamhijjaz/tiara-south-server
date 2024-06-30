@@ -8,13 +8,13 @@ app.use(cors());
 const db = require("./models");
 
 
-// Routers
+// Routers migh change later 
 const postRouter = require("./routes/Posts");
 app.use("/posts", postRouter);
 
-let port = 3001;
+let port = process.env.PORT || 3001;
 db.sequelize.sync().then(() => {
-  app.listen(port, () => {
+  app.listen( port, () => {
     console.log("Server running on port: " + port);
   });
 });
