@@ -7,8 +7,8 @@ app.use(cors());
 require("dotenv").config();
 
 const db = require("./models");
-console.log("Running");
-const userRouter = require("./routes/Users");
+console.log("Running...");
+const userRouter = require("./routes/Users.js");
 app.use("/auth", userRouter);
 
 db.sequelize.sync().then(() =>{

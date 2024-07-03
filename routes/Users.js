@@ -3,58 +3,55 @@ const router = express.Router();
 const { Users } = require("../models");
 const bcrypt = require("bcryptjs");
 const { sign } = require("jsonwebtoken");
-const {validateToken} = require("../middleware/AuthMiddleware");
-// router.get("/", async (req,res) =>{
-//     const postList = await Posts.findAll();
-//     res.json(postList);
-// });
+const { validateToken } = require("../middleware/AuthMiddleware");
 
-router.post("/", async (req, res) => {
-  const { username, email, password, isAdmin } = req.body;
+router.post("/signup", async (req, res) => {
+  const { email, password } = req.body;
   bcrypt.hash(password, 10).then((hash) => {
     Users.create({
-      username: username,
       email: email,
       password: hash,
-      isAdmin: isAdmin || false,
+      // isAdmin: isAdmin || false,
     });
     res.json("Success");
+    
   });
 });
 
-router.post("/Login", async (req, res) => {
+router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-  const user = await Users.findOne({ where: { email: email } });
+  try {
+    const user = await Users.findOne({ where: { email: email } });
+    if (!user) {
+      return res.status(404).json({ error: "User doesn't exist!" });
+    }
 
-  if (!user) {
-    return res.json({
-      error: "User doesn't exist!",
-    });
-  }
-
-  bcrypt.compare(password, user.password).then((match) => {
+    const match = await bcrypt.compare(password, user.password);
     if (!match) {
-      return res.json({
-        error: "Wrong email and password combination",
-      });
+      return res
+        .status(401)
+        .json({ error: "Wrong email and password combination" });
     }
 
     const accessToken = sign(
-      { email: user.email, username:user.username, id: user.id },
+      { email: user.email, id: user.id },
       "importantsecret"
     );
-    return res.json({
+    res.json({
       token: accessToken,
-      username: user.username,
+      email: user.email,
       id: user.id,
     });
-  });
+  } catch (error) {
+    console.error("Error logging in:", error);
+    res.status(500).json({ error: "Failed to log in" });
+  }
 });
 
-
-router.get("/auth", validateToken, async (req, res) =>{
-    res.json(req.user);
+router.get("/auth", validateToken, async (req, res) => {
+  res.json(req.user);
+  console.log(req.user);
 });
 
 module.exports = router;

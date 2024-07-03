@@ -1,22 +1,25 @@
-const { verify } = require("jsonwebtoken");
+const { verify } = require("jsonwebtoken"); 
 
-const validateToken = (req, res, next) =>{
-    const accessToken = req.header("accessToken");
+const validateToken = (req, res, next) => {
+  const accessToken = req.header("accessToken");
 
-    if(!accessToken){
-        return res.json({error :"User not logged in !"});
+  if (!accessToken) {
+    return res.status(401).json({ error: "User not logged in!" });
+  }
+
+  try {
+    // localStorage.getItem("email");
+    // localStorage.getItem("password");
+    console.log("Token:", res.accessToken);
+    console.log("Email and Password :"+this.email, this.password)
+    const validToken = verify(accessToken, "importantsecret");
+    req.user = validToken;
+    if (validToken) {
+      return next();
     }
-    
-    try {
-        const validToken = verify(accessToken, "importantsecret");
-        req.user = validToken;
-        if(validToken){
-            return next();
-        }
-
-    } catch (error) {
-        return res.json({error:error});
-    }
+  } catch (error) {
+    return res.status(401).json("Error Middleware: "+res.error);
+  }
 };
 
 module.exports = { validateToken };
