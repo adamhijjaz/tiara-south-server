@@ -8,8 +8,6 @@ const validateToken = (req, res, next) => {
   }
 
   try {
-    // localStorage.getItem("email");
-    // localStorage.getItem("password");
     console.log("Token:", res.accessToken);
     console.log("Email and Password :"+this.email, this.password)
     const validToken = verify(accessToken, "importantsecret");
