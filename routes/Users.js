@@ -6,15 +6,15 @@ const { sign } = require("jsonwebtoken");
 const { validateToken } = require("../middleware/AuthMiddleware");
 
 router.post("/signup", async (req, res) => {
-  const { email, password } = req.body;
+  const {username, email, password,isAdmin } = req.body;
   bcrypt.hash(password, 10).then((hash) => {
     Users.create({
+      username: username,
       email: email,
       password: hash,
-      // isAdmin: isAdmin || false,
+      isAdmin: isAdmin || false,
     });
     res.json("Success");
-    
   });
 });
 
@@ -22,26 +22,29 @@ router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await Users.findOne({ where: { email: email } });
+    const user = await Users.findOne({
+      where: { email: email },
+    });
     if (!user) {
       return res.status(404).json({ error: "User doesn't exist!" });
     }
 
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) {
-      return res
-        .status(401)
-        .json({ error: "Wrong email and password combination" });
-    }
-
-    const accessToken = sign(
-      { email: user.email, id: user.id },
-      "importantsecret"
-    );
-    res.json({
-      token: accessToken,
-      email: user.email,
-      id: user.id,
+    bcrypt.compare(password, user.password).then((match) => {
+      if (!match) {
+        return res.json({
+          error: "Wrong email and password combination 001",
+        });
+      }
+  
+      const accessToken = sign(
+        { email: user.email, username:user.username, id: user.id },
+        "importantsecret"
+      );
+      return res.json({
+        token: accessToken,
+        username: user.username,
+        id: user.id,
+      });
     });
   } catch (error) {
     console.error("Error logging in:", error);
