@@ -8,12 +8,15 @@ require("dotenv").config();
 
 const db = require("./models");
 console.log("Running...");
+
 const userRouter = require("./routes/Users.js");
 app.use("/auth", userRouter);
 
-db.sequelize.sync().then(() =>{
-    app.listen(process.env.PORT || 3001, () => {
-        console.log("Serever run on port 3001");
-    });
-});
+const complaintRouter = require("./routes/Complaints.js");
+app.use("/complaints", complaintRouter);
 
+db.sequelize.sync().then(() => {
+  app.listen(process.env.PORT || 3001, () => {
+    console.log("Server running on port 3001");
+  });
+});
